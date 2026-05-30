@@ -1,30 +1,19 @@
 package main
 
 import (
-	"net/http"
-	"os"
+	"log"
 
-	"github.com/gin-gonic/gin"
+	"restaurant-api/config"
+	"restaurant-api/models"
 )
 
 func main() {
-	r := gin.Default()
+	db := config.ConnectDatabase()
 
-	r.GET("/favicon.ico", func(c *gin.Context) {
-		c.Status(204)
-	})
-
-	r.GET("/ping", func(c *gin.Context) {
-		// Trả về dữ liệu dạng JSON với mã HTTP Status 200 (OK)
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
-
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8001"
+	err := db.AutoMigrate(&models.MenuItem{})
+	if err != nil {
+		log.Fatal("Migration failed:", err)
 	}
-	r.Run(":" + port)
 
+	log.Println("Migration completed")
 }
