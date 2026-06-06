@@ -1,45 +1,44 @@
 package config
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"os"
-	"restaurant-api/models"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	_ "github.com/lib/pq"
 )
 
-var DB *gorm.DB
-
-func ConnectDatabase() {
+func DB_Connection() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Println("No .env file found")
+		log.Fatal("Error loading .env file")
 	}
+	host := os.Getenv("DB_HOST")
+	port := os.Getenv("DB_PORT")
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
+	dbname := os.Getenv("DB_NAME")
 
-	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=%s",
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_PASSWORD"),
-		os.Getenv("DB_NAME"),
-		os.Getenv("DB_PORT"),
-		os.Getenv("DB_TIMEZONE"),
-	)
+	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		user, password, host, port, dbname)
 
-	database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	fmt.Println(dsn)
+
+	// Kết nối PostgreSQL
+	pgDB, err := sql.Open("postgres", dsn)
 	if err != nil {
-		log.Fatal("Failed to connect to database:", err)
+		log.Fatal(err)
 	}
+	defer pgDB.Close()
 
-	err = database.AutoMigrate(&models.MenuItem{})
+	// Kiểm tra kết nối thành công
+	err = pgDB.Ping()
 	if err != nil {
-		log.Fatal("Failed to migrate database:", err)
+		log.Fatal(err)
 	}
 
-	DB = database
-
-	log.Println("Database connected successfully")
+	fmt.Println("Connected to PostgreSQL")
 }

@@ -25,3 +25,37 @@ restaurant-api/
 ├── go.sum                 # Bản checksum của các gói thư viện
 └── main.go                # Entrypoint - Điểm khởi chạy duy nhất của ứng dụng
 ````
+
+### CB Connection
+
+````go
+    err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	host := os.Getenv("DB_HOST")
+	port := os.Getenv("DB_PORT")
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
+	dbname := os.Getenv("DB_NAME")
+
+	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		user, password, host, port, dbname)
+
+	fmt.Println(dsn)
+
+	// connect DB
+	pgDB, err := sql.Open("postgres", dsn)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer pgDB.Close()
+
+	// Check if the connection is successful
+	err = pgDB.Ping()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Connected to PostgreSQL")
+````
