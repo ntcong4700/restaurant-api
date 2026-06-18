@@ -1,6 +1,6 @@
 package models
 
 type Table struct {
-	ID     int    `json:"id"`
-	status string `json:"status"`
+	ID           int    `json:"id"`
+	Is_available string `json:"status"`
 }

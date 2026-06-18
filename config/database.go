@@ -9,12 +9,13 @@ import (
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var DB *gorm.DB
 
 func ConnectDatabase() {
-	err := godotenv.Load()
+	err := godotenv.Load(".env")
 	if err != nil {
 		log.Println("No .env file found")
 	}
@@ -29,12 +30,15 @@ func ConnectDatabase() {
 		os.Getenv("DB_TIMEZONE"),
 	)
 
-	database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
 
-	err = database.AutoMigrate(&models.MenuItem{})
+	err = database.AutoMigrate(&models.MenuItem{}, &models.Order{}, &models.OrderDetail{}, &models.Table{})
+
 	if err != nil {
 		log.Fatal("Failed to migrate database:", err)
 	}

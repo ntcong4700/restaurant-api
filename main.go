@@ -3,17 +3,18 @@ package main
 import (
 	"log"
 
+	"github.com/joho/godotenv"
+
 	"restaurant-api/config"
-	"restaurant-api/models"
 )
 
 func main() {
-	db := config.ConnectDatabase()
-
-	err := db.AutoMigrate(&models.MenuItem{})
+	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatal("Migration failed:", err)
+		log.Println("No .env file found")
 	}
 
-	log.Println("Migration completed")
+	config.ConnectDatabase()
+
+	log.Println("App started")
 }
